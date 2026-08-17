@@ -74,3 +74,46 @@ int collisions_bullets_enemies(
 
     return points_earned;
 }
+
+// enemies colllision with player
+void collisions_player_enemies(
+    Player *player,
+    Enemy enemies[],
+    Uint32 current_time
+)
+{
+    // Create a collision rectangle for the player.
+    SDL_Rect player_rect =
+    {
+        (int)player->x,
+        (int)player->y,
+        player->width,
+        player->height
+    };
+
+    // Check the player against every active enemy.
+    for (int e = 0; e < MAX_ENEMIES; e++)
+    {
+        if (!enemies[e].active)
+        {
+            continue;
+        }
+
+        SDL_Rect enemy_rect =
+        {
+            (int)enemies[e].x,
+            (int)enemies[e].y,
+            enemies[e].width,
+            enemies[e].height
+        };
+
+        if (check_collision(&player_rect, &enemy_rect))
+        {
+            // Damage the player.
+            player_take_damage(player, current_time);
+
+            // Destroy the Scout that hit the player.
+            enemies[e].active = 0;
+        }
+    }
+}

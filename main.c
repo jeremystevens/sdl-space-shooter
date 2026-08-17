@@ -1,3 +1,4 @@
+//   SDL port  from my  pyxel python verison game
 #include <stdio.h>  // Provides printf() for console output and error messages
 #include <SDL.h>    // SDL2 functions, types, and constants
 #include <stdlib.h>
@@ -146,7 +147,11 @@ int main(void)
         const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
 
         // player movement
-        player_update(&player, keyboard);
+        player_update(
+            &player,
+            keyboard,
+            SDL_GetTicks()
+        );
 
         // Fire continuously while the Space bar is held down.
         if (keyboard[SDL_SCANCODE_SPACE])
@@ -171,6 +176,11 @@ int main(void)
                      bullets,
                      enemies
                  );
+        collisions_player_enemies(
+            &player,
+            enemies,
+            SDL_GetTicks()
+        );
 
         // Spawn a new enemy after enough time has passed.
         Uint32 current_time = SDL_GetTicks();

@@ -1,4 +1,7 @@
 #include "player.h"
+#include <stdio.h>
+// set the invulnerable  time between deaths
+#define INVULNERABILITY_TIME 1500
 
 void player_init(Player *player)
 {
@@ -8,11 +11,16 @@ void player_init(Player *player)
     player->height = 10;
     player->speed = 2.0f;
     player->lives = 3;
+    player->invulnerable = 0;
+    player->invulnerable_until = 0;
 }
 // Update player movement when keys are pressed
-void player_update(Player *player, const Uint8 *keyboard)
+void player_update(
+    Player *player,
+    const Uint8 *keyboard,
+    Uint32 current_time
+)
 {
-
 
     // Move the player while the arrow keys are held down.
     if (keyboard[SDL_SCANCODE_UP])
@@ -55,6 +63,37 @@ void player_update(Player *player, const Uint8 *keyboard)
     {
         player->y = 120 - player->height;
     }
+    // End invulnerability after the timer expires.
+    if (player->invulnerable &&
+            current_time >= player->invulnerable_until)
+    {
+        player->invulnerable = 0;
+    }
+}
+
+// player damage function
+void player_take_damage(Player *player, Uint32 current_time)
+{
+    // Ignore damage while the player is invulnerable.
+    if (player->invulnerable || player->lives <= 0)
+    {
+        return;
+    }
+
+    // Remove one life.
+    player->lives--;
+
+    if (player->lives < 0)
+    {
+        player->lives = 0;
+    }
+
+    printf("Player hit! Lives remaining: %d\n", player->lives);
+
+    // Temporarily protect the player from additional damage.
+    player->invulnerable = 1;
+    player->invulnerable_until =
+        current_time + INVULNERABILITY_TIME;
 }
 
 // Render the players ship

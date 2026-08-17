@@ -5,6 +5,7 @@
 
 #include "bullet.h"
 #include "enemy.h"
+#include "player.h"
 
 
 // Returns 1 if two rectangles overlap, otherwise 0.
@@ -21,5 +22,10 @@ int collisions_bullets_enemies(
     Enemy enemies[]
 );
 
-
+// Handle collisions between the player and enemies.
+void collisions_player_enemies(
+    Player *player,
+    Enemy enemies[],
+    Uint32 current_time
+);
 #endif
