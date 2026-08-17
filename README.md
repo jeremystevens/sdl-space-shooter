@@ -206,7 +206,7 @@ The original game was written in **Python + Pyxel**. This port explores how thos
 - [x] Scout enemy
 - [x] Enemy health
 - [x] Retro Scout graphics
-- [ ] Player/enemy collision
+- [x] Player/enemy collision
 - [ ] Enemy attacks
 - [ ] Additional enemy types
 
