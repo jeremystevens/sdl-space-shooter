@@ -10,6 +10,7 @@
 #include "audio.h"
 #include "enemy.h"
 #include "collision.h"
+#include "text.h"
 
 // Set the Frames per Second
 #define TARGET_FPS 60
@@ -252,8 +253,31 @@ int main(void)
 
         // Draw active enemies
         enemies_render(renderer, enemies);
+
         // Draw the player.
         player_render(renderer, &player);
+
+        // if game over render game over text
+        if (game_state == GAME_OVER)
+        {
+            // Set text color to white.
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+            text_draw(
+                renderer,
+                "GAME OVER",
+                32,
+                50,
+                2
+            );
+            text_draw(
+                renderer,
+                "PRESS R TO RESTART",
+                29,
+                70,
+                1
+            );
+        }
 
         // Display the completed frame in the window.
         SDL_RenderPresent(renderer);

@@ -1,0 +1,229 @@
+#include "text.h"
+
+#include <ctype.h>
+#include <string.h>
+
+#define FONT_WIDTH 5
+#define FONT_HEIGHT 7
+
+typedef struct
+{
+    char character;
+    const char *rows[FONT_HEIGHT];
+
+} BitmapCharacter;
+
+
+static const BitmapCharacter font[] =
+{
+    {
+        'G',
+        {
+            ".###.",
+            "#....",
+            "#....",
+            "#.###",
+            "#...#",
+            "#...#",
+            ".###."
+        }
+    },
+
+    {
+        'A',
+        {
+            ".###.",
+            "#...#",
+            "#...#",
+            "#####",
+            "#...#",
+            "#...#",
+            "#...#"
+        }
+    },
+
+    {
+        'M',
+        {
+            "#...#",
+            "##.##",
+            "#.#.#",
+            "#.#.#",
+            "#...#",
+            "#...#",
+            "#...#"
+        }
+    },
+
+    {
+        'E',
+        {
+            "#####",
+            "#....",
+            "#....",
+            "####.",
+            "#....",
+            "#....",
+            "#####"
+        }
+    },
+
+    {
+        'O',
+        {
+            ".###.",
+            "#...#",
+            "#...#",
+            "#...#",
+            "#...#",
+            "#...#",
+            ".###."
+        }
+    },
+
+    {
+        'V',
+        {
+            "#...#",
+            "#...#",
+            "#...#",
+            "#...#",
+            "#...#",
+            ".#.#.",
+            "..#.."
+        }
+    },
+
+    {
+        'R',
+        {
+            "####.",
+            "#...#",
+            "#...#",
+            "####.",
+            "#.#..",
+            "#..#.",
+            "#...#"
+        }
+    },
+
+    {
+    'P',
+    {
+        "####.",
+        "#...#",
+        "#...#",
+        "####.",
+        "#....",
+        "#....",
+        "#...."
+    }
+},
+
+{
+    'S',
+    {
+        ".####",
+        "#....",
+        "#....",
+        ".###.",
+        "....#",
+        "....#",
+        "####."
+    }
+},
+
+{
+    'T',
+    {
+        "#####",
+        "..#..",
+        "..#..",
+        "..#..",
+        "..#..",
+        "..#..",
+        "..#.."
+    }
+}
+};
+
+void text_draw_char(
+    SDL_Renderer *renderer,
+    char character,
+    int x,
+    int y,
+    int scale
+)
+{
+    // Convert lowercase letters to uppercase.
+    character = (char)toupper((unsigned char)character);
+
+    int font_count = sizeof(font) / sizeof(font[0]);
+
+    // Search our font table for the requested character.
+    for (int i = 0; i < font_count; i++)
+    {
+        if (font[i].character == character)
+        {
+            // Go through all 7 rows of the character.
+            for (int row = 0; row < FONT_HEIGHT; row++)
+            {
+                // Go through all 5 columns.
+                for (int col = 0; col < FONT_WIDTH; col++)
+                {
+                    if (font[i].rows[row][col] == '#')
+                    {
+                        SDL_Rect pixel =
+                        {
+                            x + (col * scale),
+                            y + (row * scale),
+                            scale,
+                            scale
+                        };
+
+                        SDL_RenderFillRect(renderer, &pixel);
+                    }
+                }
+            }
+
+            return;
+        }
+    }
+}
+
+// render text
+void text_draw(
+    SDL_Renderer *renderer,
+    const char *text,
+    int x,
+    int y,
+    int scale
+)
+{
+    int cursor_x = x;
+
+    // Draw each character in the string.
+    for (int i = 0; text[i] != '\0'; i++)
+    {
+        // Spaces don't need to be rendered.
+        // Just move the cursor forward.
+        if (text[i] == ' ')
+        {
+            cursor_x += (FONT_WIDTH + 1) * scale;
+            continue;
+        }
+
+        text_draw_char(
+            renderer,
+            text[i],
+            cursor_x,
+            y,
+            scale
+        );
+
+        // Move to the position of the next character.
+        cursor_x += (FONT_WIDTH + 1) * scale;
+    }
+}
+
+
