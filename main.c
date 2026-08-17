@@ -19,11 +19,21 @@
 // define score & set score to zero
 int score = 0;
 
+// game state
+typedef enum
+{
+    GAME_PLAYING,
+    GAME_OVER
+
+} GameState;
+
 int main(void)
 {
     // Create an array capable of storing all background stars.
     Star stars[MAX_STARS];
     starfield_init(stars);
+    // set the init game state
+    GameState game_state = GAME_PLAYING;
 
     // SDL_Init() returns 0 on success and a non-zero value on failure.
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
@@ -146,54 +156,83 @@ int main(void)
         // This lets us detect keys that are being held down.
         const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
 
-        // player movement
-        player_update(
-            &player,
-            keyboard,
-            SDL_GetTicks()
-        );
-
-        // Fire continuously while the Space bar is held down.
-        if (keyboard[SDL_SCANCODE_SPACE])
+        // wrapped for gamestate changes
+        if (game_state == GAME_PLAYING)
         {
+            // player movement
+            player_update(
+                &player,
+                keyboard,
+                SDL_GetTicks()
+            );
+
+            // if no lives remain change game state
+            if (player.lives <= 0)
+            {
+                game_state = GAME_OVER;
+            }
+
+            // Fire continuously while the Space bar is held down.
+            if (keyboard[SDL_SCANCODE_SPACE])
+            {
+                Uint32 current_time = SDL_GetTicks();
+
+                if (bullets_fire(
+                            bullets,
+                            &player,
+                            current_time,
+                            &last_shot_time))
+                {
+                    audio_play_laser(&laser);
+                }
+            }
+
+            // update bullets
+            bullets_update(bullets);
+
+            // bullets against enemies
+            score += collisions_bullets_enemies(
+                         bullets,
+                         enemies
+                     );
+            collisions_player_enemies(
+                &player,
+                enemies,
+                SDL_GetTicks()
+            );
+
+            // Spawn a new enemy after enough time has passed.
             Uint32 current_time = SDL_GetTicks();
 
-            if (bullets_fire(
-                        bullets,
-                        &player,
-                        current_time,
-                        &last_shot_time))
+            // enemy spawning
+            enemies_spawn(
+                enemies,
+                current_time,
+                &last_enemy_spawn
+            );
+
+            // Update all active enemies.
+            enemies_update(enemies);
+
+        }// end GAME_PLAYING
+
+        // if game over keyboard R to restart
+        if (game_state == GAME_OVER)
+        {
+            if (keyboard[SDL_SCANCODE_R])
             {
-                audio_play_laser(&laser);
+                player_init(&player);
+                bullets_init(bullets);
+                enemies_init(enemies);
+
+                last_shot_time = 0;
+                last_enemy_spawn = SDL_GetTicks();
+
+                score = 0;
+
+                game_state = GAME_PLAYING;
             }
-        }
-
-        // update bullets
-        bullets_update(bullets);
-
-        // bullets against enemies
-        score += collisions_bullets_enemies(
-                     bullets,
-                     enemies
-                 );
-        collisions_player_enemies(
-            &player,
-            enemies,
-            SDL_GetTicks()
-        );
-
-        // Spawn a new enemy after enough time has passed.
-        Uint32 current_time = SDL_GetTicks();
-
-        // enemy spawning
-        enemies_spawn(
-            enemies,
-            current_time,
-            &last_enemy_spawn
-        );
-
-        // Update all active enemies.
-        enemies_update(enemies);
+        } // end of game state check
 
         // update the scrolling starfield
         starfield_update(stars);

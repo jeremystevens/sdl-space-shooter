@@ -99,6 +99,18 @@ void player_take_damage(Player *player, Uint32 current_time)
 // Render the players ship
 void player_render(SDL_Renderer *renderer, const Player *player)
 {
+    // Blink the ship while temporarily invulnerable.
+    if (player->invulnerable)
+    {
+        Uint32 current_time = SDL_GetTicks();
+
+        // Alternate visibility every 100 milliseconds.
+        if ((current_time / 100) % 2 == 0)
+        {
+            return;
+        }
+    }
+
     int x = (int)player->x;
     int y = (int)player->y;
 
