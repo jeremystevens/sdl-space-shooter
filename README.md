@@ -42,7 +42,13 @@ Rather than translating the Python source line-by-line, this version is being **
 | Bullet/enemy collision | ✅ |
 | Enemy health & score tracking | ✅ |
 | Modular C architecture | ✅ |
-| Player damage / lives | 🚧 |
+| Player damage / lives | ✅ |
+| Player/Scout collision | ✅ |
+| Timed post-hit invulnerability | ✅ |
+| Blinking damage feedback | ✅ |
+| Game states & restart behavior | ✅ |
+| Custom 5×7 bitmap text renderer | ✅ |
+| Retro Game Over screen | ✅ |
 | Enemy weapons | 🚧 |
 | Additional enemy types | 📋 |
 | Asteroids / hazards | 📋 |
@@ -85,7 +91,8 @@ sdl-space-shooter/
 │   ├── collision.h
 │   ├── enemy.h
 │   ├── player.h
-│   └── starfield.h
+│   ├── starfield.h
+│   └── text.h
 │
 ├── src/
 │   ├── audio.c
@@ -93,7 +100,8 @@ sdl-space-shooter/
 │   ├── collision.c
 │   ├── enemy.c
 │   ├── player.c
-│   └── starfield.c
+│   ├── starfield.c
+│   └── text.c
 │
 ├── main.c
 └── space_shooter.cbp
@@ -101,13 +109,14 @@ sdl-space-shooter/
 
 | Module | Responsibility |
 |:--|:--|
-| `player.c` | Player initialization, movement, boundaries & rendering |
+| `player.c` | Player initialization, movement, boundaries, damage, invulnerability & rendering |
 | `starfield.c` | Parallax stars, recycling & rendering |
 | `bullet.c` | Bullet pool, firing, cooldown, movement & rendering |
 | `enemy.c` | Enemy pool, Scout spawning, movement & rendering |
-| `collision.c` | Cross-system collision handling & score results |
+| `collision.c` | Bullet/enemy and player/enemy collision handling & score results |
 | `audio.c` | SDL2 audio device & procedural laser synthesis |
-| `main.c` | SDL setup, game loop, game state & system coordination |
+| `text.c` | Built-in 5×7 bitmap font and scalable retro text rendering |
+| `main.c` | SDL setup, game loop, game states, restart flow & system coordination |
 
 ---
 
@@ -206,18 +215,38 @@ The original game was written in **Python + Pyxel**. This port explores how thos
 - [x] Scout enemy
 - [x] Enemy health
 - [x] Retro Scout graphics
-- [ ] Player/enemy collision
+- [x] Player/enemy collision
 - [ ] Enemy attacks
 - [ ] Additional enemy types
 
+### Player Damage & Game States
+- [x] Three-life player damage system
+- [x] Timed post-hit invulnerability
+- [x] Blinking invulnerability feedback
+- [x] Prevent lives from dropping below zero
+- [x] `GAME_PLAYING` and `GAME_OVER` states
+- [x] Freeze gameplay on Game Over while keeping the starfield active
+- [x] Restart with the R key
+- [x] Reset player, bullets, enemies, score, and timers on restart
+
+### UI & Text
+- [x] Built-in 5×7 bitmap font
+- [x] Scalable text renderer
+- [x] Retro `GAME OVER` display
+- [x] `PRESS R TO RESTART` prompt
+- [ ] HUD and visible scoring
+- [ ] Visible lives display
+
 ### Future
 - [ ] Asteroids and hazards
-- [ ] HUD and visible scoring
-- [ ] Player damage feedback
+- [ ] Enemy attacks
+- [ ] Additional enemy types
 - [ ] Power-ups and additional weapons
-- [ ] Explosions and effects
+- [ ] Enemy destruction visual effects
+- [ ] Enemy destruction sound
+- [ ] Player destruction visual effect
+- [ ] Player destruction sound
 - [ ] Boss encounters
-- [ ] Game-over / restart flow
 - [ ] Further graphics polish
 
 ---
