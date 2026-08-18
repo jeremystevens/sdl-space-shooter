@@ -1,5 +1,9 @@
-#include "player.h"
 #include <stdio.h>
+
+#include "player.h"  // player header
+
+#include "game_config.h" // game config
+
 // set the invulnerable  time between deaths
 #define INVULNERABILITY_TIME 1500
 
@@ -48,11 +52,16 @@ void player_update(
     {
         player->x = 0;
     }
-
-    if (player->y < 0)
-    {
-        player->y = 0;
-    }
+//
+//    if (player->y < 0)
+//    {
+//        player->y = 0;
+//    }
+    // keep the player from HUD area
+    if (player->y < HUD_HEIGHT)
+{
+    player->y = HUD_HEIGHT;
+}
 
     if (player->x + player->width > 160)
     {

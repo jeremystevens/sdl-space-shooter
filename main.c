@@ -11,7 +11,7 @@
 #include "enemy.h"
 #include "collision.h"
 #include "text.h"
-
+#include "game_config.h"
 // Set the Frames per Second
 #define TARGET_FPS 60
 #define FRAME_TIME (1000 / TARGET_FPS)
@@ -245,9 +245,56 @@ int main(void)
         // Clear the previous frame using the current drawing color.
         SDL_RenderClear(renderer);
 
+        // variables for score + lives
+        char score_text[32];
+        char lives_text[32];
+
+        // score + lives
+        snprintf(
+            score_text,
+            sizeof(score_text),
+            "SCORE %d",
+            score
+        );
+
+        snprintf(
+            lives_text,
+            sizeof(lives_text),
+            "LIVES %d",
+            player.lives
+        );
+
+
         // Render star field
         starfield_render(renderer, stars);
 
+        // Draw HUD text in white.
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+        text_draw(
+            renderer,
+            score_text,
+            2,
+            2,
+            1
+        );
+
+        text_draw(
+            renderer,
+            lives_text,
+            112,
+            2,
+            1
+        );
+
+        // Draw a divider underneath the HUD.
+        SDL_RenderDrawLine(
+            renderer,
+            0,
+            HUD_HEIGHT - 1,
+            SCREEN_WIDTH,
+            HUD_HEIGHT - 1
+        );
         // Render bullets
         bullets_render(renderer, bullets);
 

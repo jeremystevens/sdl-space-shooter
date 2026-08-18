@@ -1,6 +1,9 @@
 #include "enemy.h"
 
+#include "game_config.h"
+
 #include <stdlib.h>
+
 
 
 void enemies_init(Enemy enemies[])
@@ -30,7 +33,9 @@ void enemies_spawn(
         if (!enemies[i].active)
         {
             enemies[i].x = 159.0f;
-            enemies[i].y = (float)(rand() % 110);
+            // this keeps enemies from spawning in the HUD area
+            enemies[i].y =
+                (float)(HUD_HEIGHT + (rand() % (SCREEN_HEIGHT - HUD_HEIGHT - enemies[i].height)));
 
             enemies[i].dx = -1.0f;
             enemies[i].dy = 0.0f;
