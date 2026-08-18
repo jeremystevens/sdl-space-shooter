@@ -43,7 +43,10 @@ Rather than translating the Python source line-by-line, this version is being **
 | Enemy health & score tracking | ✅ |
 | Modular C architecture | ✅ |
 | Player damage / lives | ✅ |
-| Enemy weapons | 🚧 |
+| Enemy projectile system | ✅ |
+| Scout firing behavior | ✅ |
+| Procedural enemy weapon audio | ✅ |
+| Enemy bullet/player collision | 🚧 |
 | Additional enemy types | 📋 |
 | Asteroids / hazards | 📋 |
 | Retro HUD & visible scoring | ✅ |
@@ -71,7 +74,19 @@ The laser effect is generated **entirely in C** rather than loaded from an audio
 
 The system uses `SDL_OpenAudioDevice()`, `SDL_AudioSpec`, audio callbacks, generated sample buffers, and waveform synthesis.
 
+Player and Scout weapon sounds are generated independently and mixed in the audio callback, allowing both effects to play at the same time. The Egg Ship retains its higher-pitched descending **PEW**, while Scout projectiles use a shorter, lower-frequency, bassier retro effect.
+
 No laser WAV required.
+
+---
+
+## 🔴 Scout Weapons
+
+Scouts now fight back with a dedicated enemy projectile system. Enemy shots use their own fixed object pool, travel from right to left, render as red-orange projectiles, and automatically return their slots to the pool after leaving the screen.
+
+Each Scout maintains its own firing timer rather than relying on one global weapon timer. Successful shots are reported back to the game loop so weapon audio is triggered only when a projectile is actually created.
+
+The current development firing delay is **1000 ms**, making Scout fire frequent enough to test combat behavior while the enemy bullet/player collision system is developed.
 
 ---
 
@@ -97,6 +112,7 @@ sdl-space-shooter/
 │   ├── bullet.h
 │   ├── collision.h
 │   ├── enemy.h
+│   ├── enemy_bullet.h
 │   ├── game_config.h
 │   ├── player.h
 │   ├── starfield.h
@@ -107,6 +123,7 @@ sdl-space-shooter/
 │   ├── bullet.c
 │   ├── collision.c
 │   ├── enemy.c
+│   ├── enemy_bullet.c
 │   ├── player.c
 │   ├── starfield.c
 │   └── text.c
@@ -120,9 +137,10 @@ sdl-space-shooter/
 | `player.c` | Player initialization, movement, boundaries & rendering |
 | `starfield.c` | Parallax stars, recycling & rendering |
 | `bullet.c` | Bullet pool, firing, cooldown, movement & rendering |
-| `enemy.c` | Enemy pool, Scout spawning, movement & rendering |
+| `enemy.c` | Enemy pool, Scout spawning, movement, rendering & timed firing behavior |
+| `enemy_bullet.c` | Enemy projectile pool, firing, movement, rendering & cleanup |
 | `collision.c` | Cross-system collision handling & score results |
-| `audio.c` | SDL2 audio device & procedural laser synthesis |
+| `audio.c` | SDL2 audio device, procedural player/Scout weapon synthesis & sound mixing |
 | `text.c` | Custom scalable 5×7 bitmap text renderer (A–Z, 0–9) |
 | `game_config.h` | Shared screen, HUD & gameplay-area dimensions |
 | `main.c` | SDL setup, game loop, game states, HUD & system coordination |
@@ -217,6 +235,10 @@ The original game was written in **Python + Pyxel**. This port explores how thos
 - [x] Fire cooldown
 - [x] Procedural laser audio
 - [x] Bullet/enemy collision
+- [x] Dedicated enemy projectile object pool
+- [x] Enemy projectile movement, rendering and cleanup
+- [x] Procedural Scout weapon audio
+- [x] Simultaneous player/enemy audio mixing
 
 ### Enemies
 - [x] Enemy pool
@@ -228,7 +250,10 @@ The original game was written in **Python + Pyxel**. This port explores how thos
 - [x] Player lives and damage
 - [x] Timed invulnerability
 - [x] Invulnerability blink feedback
-- [ ] Enemy attacks
+- [x] Timed Scout firing
+- [x] Individual Scout firing timers
+- [x] Scout projectile attacks
+- [ ] Enemy bullet/player collision
 - [ ] Additional enemy types
 
 ### Interface & Game States
@@ -241,7 +266,7 @@ The original game was written in **Python + Pyxel**. This port explores how thos
 - [x] Full gameplay reset on restart
 
 ### Future
-- [ ] Enemy attacks
+- [ ] Enemy bullet/player collision
 - [ ] Additional enemy types
 - [ ] Asteroids and hazards
 - [ ] Player and enemy destruction effects

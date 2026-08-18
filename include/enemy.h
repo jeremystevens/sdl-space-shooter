@@ -2,6 +2,7 @@
 #define ENEMY_H
 
 #include <SDL.h>
+#include "enemy_bullet.h"
 
 #define MAX_ENEMIES 20
 #define ENEMY_SPAWN_TIME 1000
@@ -20,8 +21,10 @@ typedef struct
     int health;
     int active;
 
-} Enemy;
+    Uint32 last_shot_time;
+    Uint32 fire_delay;
 
+} Enemy;
 
 // Initialize the enemy pool.
 void enemies_init(Enemy enemies[]);
@@ -34,6 +37,12 @@ void enemies_spawn(
     Uint32 *last_enemy_spawn
 );
 
+
+int enemies_fire(
+    Enemy enemies[],
+    EnemyBullet bullets[],
+    Uint32 current_time
+);
 
 // Update all active enemies.
 void enemies_update(Enemy enemies[]);

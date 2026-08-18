@@ -3,11 +3,14 @@
 #include <math.h>
 #include <stdio.h>
 
-
+// define player lazer sound
 #define SAMPLE_RATE 44100
 #define LASER_FREQUENCY 900.0
 #define LASER_DURATION 4000
 
+// define enemy lazer sound for scout
+#define ENEMY_LASER_FREQUENCY 450.0
+#define ENEMY_LASER_DURATION 2500
 
 // SDL identifier for the audio device we open.
 static SDL_AudioDeviceID audio_device = 0;
@@ -25,12 +28,12 @@ static void audio_callback(void *userdata, Uint8 *stream, int len)
 
     for (int i = 0; i < sample_count; i++)
     {
+        float sample = 0.0f;
         if (sound->samples_remaining > 0)
         {
             // Generate a square wave for a crunchy retro sound.
-            buffer[i] =
-                (sin(sound->phase) > 0.0) ? 0.2f : -0.2f;
-
+            sample +=
+            (sin(sound->phase) > 0.0) ? 0.2f : -0.2f;
 
             // Gradually lower the frequency to create
             // the descending "pew" sound.
@@ -50,11 +53,29 @@ static void audio_callback(void *userdata, Uint8 *stream, int len)
 
             sound->samples_remaining--;
         }
-        else
+        // Generate the enemy laser sound.
+        if (sound->enemy_samples_remaining > 0)
         {
-            // Output silence when no laser is playing.
-            buffer[i] = 0.0f;
+            // Lower, harsher square wave for Scout weapons.
+            sample +=
+            (sin(sound->enemy_phase) > 0.0) ? 0.15f : -0.15f;
+
+            // Slide the enemy frequency downward.
+            sound->enemy_frequency -= 1.0;
+
+            if (sound->enemy_frequency < 80.0)
+            {
+                sound->enemy_frequency = 80.0;
+            }
+
+            // Advance the enemy waveform phase.
+            sound->enemy_phase +=
+                (2.0 * M_PI * sound->enemy_frequency) / SAMPLE_RATE;
+
+            sound->enemy_samples_remaining--;
         }
+    // end of changes MCH
+      buffer[i] = sample;
     }
 }
 
@@ -84,6 +105,11 @@ int audio_init(LaserSound *laser)
     laser->frequency = LASER_FREQUENCY;
     laser->samples_remaining = 0;
 
+    // Initialize the enemy laser sound state.
+    laser->enemy_phase = 0.0;
+   // laser->enemy_frequency = 0.0;
+    laser->enemy_frequency = ENEMY_LASER_FREQUENCY;
+    laser->enemy_samples_remaining = 0;
 
     // Open the default playback device.
     audio_device = SDL_OpenAudioDevice(
@@ -142,6 +168,23 @@ void audio_play_laser(LaserSound *laser)
     SDL_UnlockAudioDevice(audio_device);
 }
 
+// Trigger the Scout enemy laser sound.
+void audio_play_enemy_laser(LaserSound *laser)
+{
+    if (audio_device == 0)
+    {
+        return;
+    }
+
+    // Protect shared audio state from the SDL audio callback.
+    SDL_LockAudioDevice(audio_device);
+
+    laser->enemy_phase = 0.0;
+    laser->enemy_frequency = ENEMY_LASER_FREQUENCY;
+    laser->enemy_samples_remaining = ENEMY_LASER_DURATION;
+
+    SDL_UnlockAudioDevice(audio_device);
+}
 
 // Close the audio device during game shutdown.
 void audio_shutdown(void)

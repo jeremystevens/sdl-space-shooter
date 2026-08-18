@@ -44,8 +44,21 @@ void enemies_spawn(
             enemies[i].width = 12;
             enemies[i].height = 8;
 
+            enemies[i].x = 159.0f;
+
+            // Keep enemies from spawning in the HUD area.
+            enemies[i].y =
+                (float)(HUD_HEIGHT +
+                        (rand() % (SCREEN_HEIGHT - HUD_HEIGHT - enemies[i].height)));
+
+            enemies[i].dx = -1.0f;
+            enemies[i].dy = 0.0f;
+
             enemies[i].health = 1;
             enemies[i].active = 1;
+
+            enemies[i].last_shot_time = current_time;
+            enemies[i].fire_delay = 1000; // originally 1800 but changed to 1000 seems better
 
             *last_enemy_spawn = current_time;
 
@@ -73,6 +86,44 @@ void enemies_update(Enemy enemies[])
     }
 }
 
+// enemy file
+int enemies_fire(
+    Enemy enemies[],
+    EnemyBullet bullets[],
+    Uint32 current_time
+)
+{
+    int fired = 0;
+    for (int i = 0; i < MAX_ENEMIES; i++)
+    {
+
+        // Ignore unused enemy slots.
+        if (!enemies[i].active)
+        {
+            continue;
+        }
+
+        // Has this Scout waited long enough to fire?
+        if (current_time - enemies[i].last_shot_time >= enemies[i].fire_delay)
+        {
+            float bullet_x = enemies[i].x;
+            float bullet_y =
+                enemies[i].y + (enemies[i].height / 2.0f);
+
+            // Fire from the Scout's position.
+            if (enemy_bullets_fire(
+                    bullets,
+                    bullet_x,
+                    bullet_y))
+            {
+                // Only reset the timer if a bullet was actually created.
+                enemies[i].last_shot_time = current_time;
+                fired = 1;
+            }
+        }
+    }
+    return fired;
+}
 
 void enemies_render(
     SDL_Renderer *renderer,
@@ -119,3 +170,4 @@ void enemies_render(
         SDL_RenderFillRect(renderer, &center);
     }
 }
+

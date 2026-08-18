@@ -3,8 +3,8 @@
 #include <ctype.h>
 #include <string.h>
 
-#define FONT_WIDTH 5
-#define FONT_HEIGHT 7
+#define FONT_WIDTH 5 // 5
+#define FONT_HEIGHT 7 // 7
 
 typedef struct
 {

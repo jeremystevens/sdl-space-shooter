@@ -9,9 +9,11 @@
 #include "bullet.h"
 #include "audio.h"
 #include "enemy.h"
+#include "enemy_bullet.h"
 #include "collision.h"
 #include "text.h"
 #include "game_config.h"
+
 // Set the Frames per Second
 #define TARGET_FPS 60
 #define FRAME_TIME (1000 / TARGET_FPS)
@@ -128,8 +130,14 @@ int main(void)
     // Create the enemy pool.
     Enemy enemies[MAX_ENEMIES];
 
+    // enemy bullets
+    EnemyBullet enemy_bullets[MAX_ENEMY_BULLETS];
+
     // init enemies
     enemies_init(enemies);
+
+    // init enemy bullets
+    enemy_bullets_init(enemy_bullets);
 
     // spawn timer for enemies
     Uint32 last_enemy_spawn = 0;
@@ -191,6 +199,9 @@ int main(void)
             // update bullets
             bullets_update(bullets);
 
+            // update enemy bullets
+            enemy_bullets_update(enemy_bullets);
+
             // bullets against enemies
             score += collisions_bullets_enemies(
                          bullets,
@@ -211,6 +222,21 @@ int main(void)
                 current_time,
                 &last_enemy_spawn
             );
+
+//            enemies_fire(
+//            enemies,
+//            enemy_bullets,
+//            SDL_GetTicks()
+//            );
+
+            // if enemy fires handle bullets + audio
+            if (enemies_fire(
+                        enemies,
+                        enemy_bullets,
+                        SDL_GetTicks()))
+            {
+                audio_play_enemy_laser(&laser);
+            }
 
             // Update all active enemies.
             enemies_update(enemies);
@@ -274,7 +300,7 @@ int main(void)
         text_draw(
             renderer,
             score_text,
-            2,
+            2, // 2
             2,
             1
         );
@@ -291,15 +317,18 @@ int main(void)
         SDL_RenderDrawLine(
             renderer,
             0,
-            HUD_HEIGHT - 1,
+            HUD_HEIGHT + 0.5, // - 1
             SCREEN_WIDTH,
-            HUD_HEIGHT - 1
+            HUD_HEIGHT + 0.5  // - 1
         );
         // Render bullets
         bullets_render(renderer, bullets);
 
         // Draw active enemies
         enemies_render(renderer, enemies);
+
+        // render enemy bullets
+        enemy_bullets_render(renderer, enemy_bullets);
 
         // Draw the player.
         player_render(renderer, &player);
